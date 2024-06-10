@@ -72,18 +72,6 @@ function cerrarSesion()
 }
 
 
-function mostrarPersonas()
-{
-
-    require_once("../dao/PersonaDao.php");
-    $persona = new Persona();
-    $personaDao = new PersonaDao();
-    
-    $_SESSION["personas"] = $personaDao->mostrar();
-    header("Location: ../vistas/personas.php");
-    exit;
-}
-
 function mostrarUsuario()
 {
 
@@ -97,33 +85,16 @@ function mostrarUsuario()
 }
 
 
-
-function agregarPersona()
-{
-
-    require_once("../dao/PersonaDao.php");
-
-    $persona = new Persona();
-    $persona->nombre = $_POST["nombre"];
-    $persona->apellido = $_POST["apellido"];
-    $personaDao = new PersonaDao();
-    if ($personaDao->agregar($persona) > 0) {
-        
-        mostrarPersonas();
-    } else {
-        
-        header("Location: ../vistas/editarpersona.php");
-        exit;
-    }
-}
-
 function agregarUsuario()
 {
 
     require_once("../dao/UsuarioDao.php");
     $usuario = new Usuario();
     $usuario->usuario = $_POST["addUser"];
-    $usuario->password = $_POST["addPassword"];
+
+    $sha256_hash = hash('sha256', $_POST["addPassword"]);  
+    $usuario->password  = $sha256_hash;
+
     $usuarioDao = new usuarioDao();
     if ($usuarioDao->agregar($usuario) > 0) {
         
@@ -134,6 +105,7 @@ function agregarUsuario()
         exit;
     }
 }
+
 
 
 function ingresar()
@@ -148,17 +120,10 @@ function ingresar()
         $_SESSION["activo"] = $usuario->usuario;
         mostrarPrincipal();
     } else {
-
         index();
     }
 }
 
-
-function agregarEditarPersona()
-{
-    header("Location: ../vistas/editarpersona.php");
-    exit;
-}
 
 function agregarEditarUsuario()
 {
@@ -166,54 +131,22 @@ function agregarEditarUsuario()
     exit;
 }
 
-function agregarModificarPersona(){
-    header("Location: ../vistas/modificarpersona.php");
-}
-
-function editarPersona(){
-    require_once('../dao/PersonaDao.php');
-    $persona = new Persona();
-    $persona->id = $_SESSION['id_us'];
-    $persona->nombre = $_POST['addNombre'];
-    $persona->apellido = $_POST['addApellido'];
-    $personaDao = new PersonaDao();
-    if($personaDao->modificar($persona) > 0){
-        mostrarPersonas();
-    }else{
-        header("Location: ../vistas/personas.php");
-        
-    }
-}
-
 function editarUsuario(){
     require_once('../dao/UsuarioDao.php');
     $usuario = new Usuario();
     $usuario->id = $_SESSION['id_user'];
     $usuario->usuario = $_POST['modUsuario'];
-    $usuario->password = $_POST['modPassword'];
+
+    $sha256_hash = hash('sha256', $_POST['modPassword']);  
+    $usuario->password = $sha256_hash;
+
+
     $usuarioDao = new UsuarioDao();
     if($usuarioDao->modificar($usuario) > 0){
         mostrarUsuario();
     }else{
         header("Location: ../vistas/usuario.php");
         
-    }
-}
-
-
-function eliminarPersona()
-{
-    
-    require_once("../dao/PersonaDao.php");
-    $persona = new Persona();
-    $persona->id = $_GET["id"];
-    $personaDao = new PersonaDao();
-    if ($personaDao->eliminar($persona) > 0) {
-        
-        mostrarPersonas();
-    } else {
-        
-        agregarEditarPersona();
     }
 }
 

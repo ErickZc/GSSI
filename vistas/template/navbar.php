@@ -12,9 +12,6 @@
             <li class="nav-item">
                 <a class="nav-link" href="../controladores/controlador.php?user=leer">Usuarios</a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link" href="../controladores/controlador.php?persona=leer">Personas</a>
-            </li>
         </ul>
         <ul class="navbar-nav mr-sm-2">
             <li class="nav-item">

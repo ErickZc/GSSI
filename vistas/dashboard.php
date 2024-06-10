@@ -12,7 +12,7 @@ if (isset($_SESSION["activo"])) {
         <div class="container">
             <h1 class="display-3">Bienvenido <?php echo $_SESSION["activo"]; ?>!</h1>
             <p>Este sistema de pruebas permite gestionar personas mediante DAO</p>
-            <p><a class="btn btn-primary btn-lg" href="../controladores/controlador.php?persona=leer" role="button">Probar ahora &raquo;</a></p>
+            <p><a class="btn btn-primary btn-lg" href="../controladores/controlador.php?user=leer" role="button">Probar ahora &raquo;</a></p>
         </div>
     </div>
     <?php

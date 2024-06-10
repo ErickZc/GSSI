@@ -31,7 +31,7 @@ if (isset($_SESSION["activo"])) {
                     <tr>
                         <td><?php echo $registro->id; ?></td>
                         <td><?php echo $registro->usuario; ?></td>
-                        <td><?php echo 'Esto es clasificado'; ?></td>
+                        <td><?php echo $registro->password; ?></td>
                         <td>
                             <a href="../vistas/modificarusuario.php?id=<?php echo $registro->id?>" class="btn btn-info btn-sm">Modificar</a>
                             <a href="../controladores/controlador.php?user=eliminar&id=<?php echo $registro->id ?>" class="btn btn-danger btn-sm">Eliminar</a>

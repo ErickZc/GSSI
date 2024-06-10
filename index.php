@@ -7,7 +7,7 @@ if (isset($_SESSION["activo"])) {
     header("Location: vistas/dashboard.php");
     exit;
 } else {
-    // En caso de no existir sesion, muestra pantalla de login
+
 ?>
 <!DOCTYPE html>
 <html lang="es">

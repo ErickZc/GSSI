@@ -176,10 +176,11 @@ class UsuarioDao
 
                 $stmt->bind_param("ss", $nombre, $pass);
                 $nombre = $usuario->usuario;
-                $pass = $usuario->password;
+                $pass = hash('sha256', $usuario->password);
                 $stmt->execute();
 
                 while ($stmt->fetch()) {
+                    
                     if($stmt == true){
                         $valido = true;
                     }
