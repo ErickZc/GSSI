@@ -1,21 +1,14 @@
 <?php
-
 session_start();
+use Firebase\JWT\JWT;
+require_once("../vendor/autoload.php");
+
 
 if (isset($_SESSION["activo"])) {
    
     if (isset($_GET["cerrar"]) && $_GET["cerrar"] == "true") {
        
         cerrarSesion();
-    } else if (isset($_POST["nombre"]) && isset($_POST["apellido"])) {
-        
-        agregarPersona();
-    } else if(isset($_GET["persona"]) && $_GET["persona"] == "agregar") {
-        
-        agregarEditarPersona();
-    } else if(isset($_GET["persona"]) && $_GET["persona"] == "leer") {
-        
-        mostrarPersonas();
     } else if(isset($_GET["user"]) && $_GET["user"] == "agregar") {
         
         agregarEditarUsuario();
@@ -31,15 +24,6 @@ if (isset($_SESSION["activo"])) {
     } else if(isset($_GET["user"]) && $_GET["user"] == "leer") {
         
         mostrarUsuario();
-    }else if(isset($_POST['addNombre']) && isset($_POST['addApellido'])){
-        
-        editarPersona();
-    }else if(isset($_GET["persona"]) && $_GET["persona"] == "modificar" && isset($_GET['id'])) {
-
-        agregarModificarPersona();
-    }else if(isset($_GET["persona"]) && $_GET["persona"] == "eliminar" && isset($_GET["id"]) && $_GET["id"] > 0) {
-        
-        eliminarPersona();
     } else {
         
         mostrarPrincipal();
@@ -89,20 +73,31 @@ function agregarUsuario()
 {
 
     require_once("../dao/UsuarioDao.php");
-    $usuario = new Usuario();
-    $usuario->usuario = $_POST["addUser"];
+    $usuarioDao = new UsuarioDao();
+    
+    $token = $_SESSION['jwt'];
 
-    $sha256_hash = hash('sha256', $_POST["addPassword"]);  
-    $usuario->password  = $sha256_hash;
+    if ($decoded = $usuarioDao->verificarToken($token)) {
+        $usuario = new Usuario();
+        $usuario->usuario = $_POST["addUser"];
+        $usuario->password = hash('sha256', $_POST["addPassword"]);
 
-    $usuarioDao = new usuarioDao();
-    if ($usuarioDao->agregar($usuario) > 0) {
-        
-        mostrarUsuario();
+        $sha256_hash = hash('sha256', $_POST["addPassword"]);  
+        $usuario->password  = $sha256_hash;
+
+        $usuarioDao = new UsuarioDao();
+        if ($usuarioDao->agregar($usuario) > 0) {
+            $_SESSION['alerta'] = true;
+            mostrarUsuario();
+        } else {
+            unset($_SESSION['activo']);
+            $_SESSION['alerta'] = false;
+            header("Location: ../index.php");
+        }
     } else {
-        
-        header("Location: ../vistas/editarusuario.php");
-        exit;
+        $_SESSION['alerta'] = false;
+        unset($_SESSION['activo']);
+        header("Location: ../index.php");
     }
 }
 
@@ -112,18 +107,32 @@ function ingresar()
 {
     
     require_once("../dao/UsuarioDao.php");
+    require_once("../vendor/autoload.php");
+
     $usuario = new Usuario();
     $usuario->usuario = $_POST["usuario"];
     $usuario->password = $_POST["password"];
     $usuarioDao = new UsuarioDao();
+    
     if ($usuarioDao->verificarUsuario($usuario)) {
+        $secretKey = "J1UX1%[3d>TIv+HwsS3;";
+        $issuedAt = time();
+        $expirationTime = $issuedAt + 30;
+        $payload = array(
+            'iat' => $issuedAt,
+            'exp' => $expirationTime,
+            'usuario' => $usuario->usuario
+        );
+
+        $jwt = JWT::encode($payload, $secretKey, 'HS256');
+        $_SESSION["jwt"] = $jwt;
         $_SESSION["activo"] = $usuario->usuario;
+
         mostrarPrincipal();
     } else {
         index();
     }
 }
-
 
 function agregarEditarUsuario()
 {
@@ -131,37 +140,62 @@ function agregarEditarUsuario()
     exit;
 }
 
-function editarUsuario(){
-    require_once('../dao/UsuarioDao.php');
-    $usuario = new Usuario();
-    $usuario->id = $_SESSION['id_user'];
-    $usuario->usuario = $_POST['modUsuario'];
-
-    $sha256_hash = hash('sha256', $_POST['modPassword']);  
-    $usuario->password = $sha256_hash;
-
-
+function editarUsuario()
+{
+    require_once("../dao/UsuarioDao.php");
     $usuarioDao = new UsuarioDao();
-    if($usuarioDao->modificar($usuario) > 0){
-        mostrarUsuario();
-    }else{
-        header("Location: ../vistas/usuario.php");
-        
+    
+    $token = $_SESSION['jwt'];
+
+    if ($decoded = $usuarioDao->verificarToken($token)) {
+        $usuario = new Usuario();
+        $usuario->id = $_SESSION['id_user'];
+        $usuario->usuario = $_POST['modUsuario'];
+        $usuario->password = hash('sha256', $_POST['modPassword']);
+
+        $usuarioDao = new UsuarioDao();
+        if ($usuarioDao->modificar($usuario) > 0) {
+            $_SESSION['alerta'] = true;
+            mostrarUsuario();
+        } else {
+            unset($_SESSION['activo']);
+            $_SESSION['alerta'] = false;
+            header("Location: ../index.php");
+        }
+    } else {
+        $_SESSION['alerta'] = false;
+        unset($_SESSION['activo']);
+        header("Location: ../index.php");
     }
+
+    
 }
 
 function eliminarUsuario()
 {
-    
+
     require_once("../dao/UsuarioDao.php");
-    $usuario = new Usuario();
-    $usuario->id = $_GET["id"];
     $usuarioDao = new UsuarioDao();
-    if ($usuarioDao->eliminar($usuario) > 0) {
-        
-        mostrarUsuario();
+    
+    $token = $_SESSION['jwt'];
+
+    if ($decoded = $usuarioDao->verificarToken($token)) {
+        $usuario = new Usuario();
+        $usuario->id = $_GET["id"];
+
+        $usuarioDao = new UsuarioDao();
+        if ($usuarioDao->eliminar($usuario) > 0) {
+            $_SESSION['alerta'] = true;
+            mostrarUsuario();
+        } else {
+            unset($_SESSION['activo']);
+            $_SESSION['alerta'] = false;
+            header("Location: ../index.php");
+        }
     } else {
-        
-        
+        $_SESSION['alerta'] = false;
+        unset($_SESSION['activo']);
+        header("Location: ../index.php");
     }
+
 }

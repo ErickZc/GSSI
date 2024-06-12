@@ -31,12 +31,23 @@ if (isset($_SESSION["activo"])) {
             <label for="inputPassword" class="sr-only">Password</label>
             <input type="password" id="inputPassword" class="form-control" name="password" placeholder="Ingrese password" required>
             <button class="btn btn-lg btn-primary btn-block" type="submit">Ingresar</button>
-            <p class="mt-5 mb-3 text-muted">DAW &copy; <?php echo date("Y"); ?></p>
+            <p class="mt-5 mb-3 text-muted">GSSI &copy; <?php echo date("Y"); ?></p>
         </form>
     </div>
 </body>
 </html>
 <?php
+
+
+
+    
+if (isset($_SESSION['alerta']) && !$_SESSION['alerta']) {
+    echo "<script>alert('El token es inválido, vuelve a iniciar sesion');</script>";
+    // Una vez que la alerta se muestra, establece la sesión de alerta como verdadera para que no se muestre nuevamente
+    $_SESSION['alerta'] = true;
+    session_destroy();
+}
+
 // Cerrando el if
 }
 ?>

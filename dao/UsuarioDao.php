@@ -1,13 +1,26 @@
 <?php
-// Agregando scripts necesarios
 require_once("IDao.php");
 require_once("../ds/DataSource.php");
 require_once("../dto/Usuario.php");
+require_once("../vendor/autoload.php");
+use \Firebase\JWT\JWT;
+use \Firebase\JWT\Key;
 
-// DAO para la tabla usuarios
 class UsuarioDao 
 {
-    // Implementando metodo READ
+
+    function verificarToken($jwt)
+    {
+        $secretKey = "J1UX1%[3d>TIv+HwsS3;";
+
+        try {
+            return JWT::decode($jwt, new Key($secretKey, 'HS256'));
+        } catch (Exception $e) {
+            return null;
+        }
+
+    }
+    
     public function mostrar()
     {
 
@@ -48,39 +61,27 @@ class UsuarioDao
         }
     }
 
-    // Implementando metodo INSERT
     public function agregar($objeto)
     {
-        // Creando objeto del DataSource
         $conexion = new DataSource();
-        // Conectando y comprobando conexion
+
         if (!$conexion->conectar()) {
             echo "La conexion fallo";
             exit;
         } else {
-            // Variable que contendra objeto DTO pasado como parametro
+
             $usuario = $objeto;
-            // Variable con llamada al procedimiento almacenado
             $sql = "CALL agregarUsuario(?, ?)";
-            // Preparando sentencia y evaluando preparacion
             if ($stmt = $conexion->preparar($sql)) {
-                // Asignando variables para enviar como parametros al SP
                 $stmt->bind_param("ss", $nombre, $password);
-                // Obteniendo valores del objeto y asignandolos a las variables
                 $nombre = $usuario->usuario;
-                // Encriptando el password del usuario
                 $password = $usuario->password;
-                // Ejecutando sentencia
                 $stmt->execute();
-                // Obteniendo cantidad de registros afectados
                 $registros = $stmt->affected_rows;
-                // Cerrando conexiones y liberando recursos
                 $stmt->close();
                 $conexion->desconectar();
-                // Retornando cantidad de registros afectados
                 return $registros;
             } else {
-                // Cerrando conexion y liberando recursos
                 $conexion->desconectar();
                 echo "Ocurrio un error al llamar al PS";
                 exit;
@@ -125,34 +126,22 @@ class UsuarioDao
     // Implementando metodo DELETE
     public function eliminar($objeto)
     {
-        // Creando objeto del DataSource
         $conexion = new DataSource();
-        // Conectando y comprobando conexion
         if (!$conexion->conectar()) {
             echo "La conexion fallo";
             exit;
         } else {
-            // Variable que contendra objeto DTO pasado como parametro
             $user = $objeto;
-            // Variable con llamada al procedimiento almacenado
             $sql = "CALL eliminarUsuario(?)";
-            // Preparando sentencia y evaluando preparacion
             if ($stmt = $conexion->preparar($sql)) {
-                // Asignando variables para enviar como parametros al SP
                 $stmt->bind_param("i", $id);
-                // Obteniendo valores del objeto y asignandolos a las variables
                 $id = $user->id;
-                // Ejecutando sentencia
                 $stmt->execute();
-                // Obteniendo cantidad de registros afectados
                 $registros = $stmt->affected_rows;
-                // Cerrando conexiones y liberando recursos
                 $stmt->close();
                 $conexion->desconectar();
-                // Retornando cantidad de registros afectados
                 return $registros;
             } else {
-                // Cerrando conexion y liberando recursos
                 $conexion->desconectar();
                 echo "Ocurrio un error al llamar al PS";
                 exit;

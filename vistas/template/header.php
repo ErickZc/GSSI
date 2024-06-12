@@ -7,5 +7,5 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <!-- Bootstrap -->
     <link rel="stylesheet" href="../css/bootstrap.min.css">
-    <title>Sistema DAW</title>
+    <title>Sistema GSSI</title>
 </head>

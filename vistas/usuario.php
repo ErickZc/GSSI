@@ -45,6 +45,7 @@ if (isset($_SESSION["activo"])) {
     </div>
     <?php
 
+
     require_once("template/footer.php");
     ?>
 </body>

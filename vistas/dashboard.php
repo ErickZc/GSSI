@@ -1,5 +1,4 @@
 <?php
-// Indicando manejo de sesiones
 session_start();
 // Evaluando si existe sesion activa
 if (isset($_SESSION["activo"])) {

@@ -21,8 +21,10 @@ if (isset($_SESSION["activo"])) {
             </div>
             <button type="submit" class="btn btn-primary">Agregar</button><br>
         </form>
+
     </div>
     <?php 
+
     // Incluyendo pie de pagina
     require_once("template/footer.php");
     ?>
