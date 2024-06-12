@@ -4,6 +4,7 @@ use Firebase\JWT\JWT;
 require_once("../vendor/autoload.php");
 
 
+## region -> validacion de sesiones
 if (isset($_SESSION["activo"])) {
    
     if (isset($_GET["cerrar"]) && $_GET["cerrar"] == "true") {
@@ -33,8 +34,9 @@ if (isset($_SESSION["activo"])) {
 } else {
     index();
 }
+## end region -> validacion de sesiones
 
-
+##region -> Funciones de redirreccion
 function index()
 {
     header("Location:../index.php");
@@ -48,6 +50,11 @@ function mostrarPrincipal()
     exit;
 }
 
+function agregarEditarUsuario()
+{
+    header("Location: ../vistas/editarusuario.php");
+    exit;
+}
 
 function cerrarSesion()
 {
@@ -55,97 +62,19 @@ function cerrarSesion()
     index();
 }
 
+## end region -> Funciones de redirreccion
 
-function mostrarUsuario()
-{
-
-    require_once("../dao/UsuarioDao.php");
-    $usuario = new Usuario();
-    $usuarioDao = new UsuarioDao();
-
-    $_SESSION["user"] = $usuarioDao->mostrar();
-    header("Location: ../vistas/usuario.php");
-    exit;
-}
-
-
-function agregarUsuario()
-{
-
-    require_once("../dao/UsuarioDao.php");
-    $usuarioDao = new UsuarioDao();
-    
-    $token = $_SESSION['jwt'];
-
-    if ($decoded = $usuarioDao->verificarToken($token)) {
-        $usuario = new Usuario();
-        $usuario->usuario = $_POST["addUser"];
-        $usuario->password = hash('sha256', $_POST["addPassword"]);
-
-        $sha256_hash = hash('sha256', $_POST["addPassword"]);  
-        $usuario->password  = $sha256_hash;
-
-        $usuarioDao = new UsuarioDao();
-        if ($usuarioDao->agregar($usuario) > 0) {
-            $_SESSION['alerta'] = true;
-            mostrarUsuario();
-        } else {
-            unset($_SESSION['activo']);
-            $_SESSION['alerta'] = false;
-            header("Location: ../index.php");
-        }
-    } else {
-        $_SESSION['alerta'] = false;
-        unset($_SESSION['activo']);
-        header("Location: ../index.php");
-    }
-}
-
-
-
-function ingresar()
-{
-    
-    require_once("../dao/UsuarioDao.php");
-    require_once("../vendor/autoload.php");
-
-    $usuario = new Usuario();
-    $usuario->usuario = $_POST["usuario"];
-    $usuario->password = $_POST["password"];
-    $usuarioDao = new UsuarioDao();
-    
-    if ($usuarioDao->verificarUsuario($usuario)) {
-        $secretKey = "J1UX1%[3d>TIv+HwsS3;";
-        $issuedAt = time();
-        $expirationTime = $issuedAt + 30;
-        $payload = array(
-            'iat' => $issuedAt,
-            'exp' => $expirationTime,
-            'usuario' => $usuario->usuario
-        );
-
-        $jwt = JWT::encode($payload, $secretKey, 'HS256');
-        $_SESSION["jwt"] = $jwt;
-        $_SESSION["activo"] = $usuario->usuario;
-
-        mostrarPrincipal();
-    } else {
-        index();
-    }
-}
-
-function agregarEditarUsuario()
-{
-    header("Location: ../vistas/editarusuario.php");
-    exit;
-}
-
+## region -> Funciones para el CRUD
 function editarUsuario()
 {
     require_once("../dao/UsuarioDao.php");
     $usuarioDao = new UsuarioDao();
     
     $token = $_SESSION['jwt'];
+
+    //Gestión de la Seguridad de la Información
+    # La verificación de tokens JWT y el cifrado de contraseñas son prácticas que mejoran 
+    # la seguridad de la información
 
     if ($decoded = $usuarioDao->verificarToken($token)) {
         $usuario = new Usuario();
@@ -198,4 +127,87 @@ function eliminarUsuario()
         header("Location: ../index.php");
     }
 
+}
+
+function mostrarUsuario()
+{
+
+    require_once("../dao/UsuarioDao.php");
+    $usuario = new Usuario();
+    $usuarioDao = new UsuarioDao();
+
+    $_SESSION["user"] = $usuarioDao->mostrar();
+    header("Location: ../vistas/usuario.php");
+    exit;
+}
+
+
+function agregarUsuario()
+{
+
+    require_once("../dao/UsuarioDao.php");
+    $usuarioDao = new UsuarioDao();
+    
+    $token = $_SESSION['jwt'];
+
+    if ($decoded = $usuarioDao->verificarToken($token)) {
+        $usuario = new Usuario();
+        $usuario->usuario = $_POST["addUser"];
+        $usuario->password = hash('sha256', $_POST["addPassword"]);
+
+        $sha256_hash = hash('sha256', $_POST["addPassword"]);  
+        $usuario->password  = $sha256_hash;
+
+        $usuarioDao = new UsuarioDao();
+        if ($usuarioDao->agregar($usuario) > 0) {
+            $_SESSION['alerta'] = true;
+            mostrarUsuario();
+        } else {
+            unset($_SESSION['activo']);
+            $_SESSION['alerta'] = false;
+            header("Location: ../index.php");
+        }
+    } else {
+        $_SESSION['alerta'] = false;
+        unset($_SESSION['activo']);
+        header("Location: ../index.php");
+    }
+}
+
+## end region -> Funciones para el CRUD
+
+## Metodo de Login
+function ingresar()
+{
+    
+    require_once("../dao/UsuarioDao.php");
+    require_once("../vendor/autoload.php");
+
+    $usuario = new Usuario();
+    $usuario->usuario = $_POST["usuario"];
+    $usuario->password = $_POST["password"];
+    $usuarioDao = new UsuarioDao();
+    
+    //Gestión de la Seguridad de la Información
+    # La verificación de tokens JWT y el cifrado de contraseñas son prácticas que mejoran 
+    # la seguridad de la información
+
+    if ($usuarioDao->verificarUsuario($usuario)) {
+        $secretKey = "J1UX1%[3d>TIv+HwsS3;";
+        $issuedAt = time();
+        $expirationTime = $issuedAt + 30;
+        $payload = array(
+            'iat' => $issuedAt,
+            'exp' => $expirationTime,
+            'usuario' => $usuario->usuario
+        );
+
+        $jwt = JWT::encode($payload, $secretKey, 'HS256');
+        $_SESSION["jwt"] = $jwt;
+        $_SESSION["activo"] = $usuario->usuario;
+
+        mostrarPrincipal();
+    } else {
+        index();
+    }
 }

@@ -9,10 +9,16 @@ use \Firebase\JWT\Key;
 class UsuarioDao 
 {
 
+//Encriptación Simétrica
+    //Gestión de la Seguridad de la Información
+    # La verificación de tokens JWT y el cifrado de contraseñas son prácticas que mejoran 
+    # la seguridad de la información
     function verificarToken($jwt)
-    {
+    {  
         $secretKey = "J1UX1%[3d>TIv+HwsS3;";
 
+        // Gestión de Problemas  ITIL
+        #Esta práctica se centra en restaurar el servicio normal lo más rápido posible tras una interrupción
         try {
             return JWT::decode($jwt, new Key($secretKey, 'HS256'));
         } catch (Exception $e) {
@@ -26,15 +32,17 @@ class UsuarioDao
 
         $conexion = new DataSource();
         
+
+        //Gestión de Incidentes ITIL
+        #Busca identificar y corregir la causa raíz de los incidentes para prevenir su recurrencia
+
         if (!$conexion->conectar()) {
             echo "La conexion fallo";
             exit;
         } else {
             
-            $usuario = null;
-            
+            $usuario = null;        
             $usuarios = array();
-            
             $sql = "CALL mostrarUsuarios()";
             
             if ($stmt = $conexion->preparar($sql)) {
@@ -54,6 +62,9 @@ class UsuarioDao
                 return $usuarios;
             } else {
                 
+                //Gestión de Incidentes ITIL
+                #Busca identificar y corregir la causa raíz de los incidentes para prevenir su recurrencia
+
                 $conexion->desconectar();
                 echo "Ocurrio un error al llamar al PS";
                 exit;
@@ -89,7 +100,6 @@ class UsuarioDao
         }
     }
 
-    // Implementando metodo UPDATE
     public function modificar($objeto)
     {
         $conexion = new DataSource();
@@ -123,7 +133,6 @@ class UsuarioDao
         }
     }
 
-    // Implementando metodo DELETE
     public function eliminar($objeto)
     {
         $conexion = new DataSource();

@@ -1,42 +1,49 @@
 <?php
-// DS que permite conectarnos con nuestra fuente de datos
+require_once __DIR__ . '/../vendor/autoload.php';
+
 class DataSource
 {
-    // Atributos
     private $conexion;
     private $host;
     private $usuario;
     private $password;
     private $db;
 
-    // Setter
     public function __set($nombre, $valor)
     {
         $this->$nombre = $valor;
     }
 
-    // Getter
     public function __get($nombre)
     {
         return $this->$nombre;
     }
 
-    // Constructor
+    //Gestión de la Seguridad de la Información
+    #Aunque las credenciales están hardcodeadas (lo cual no es una práctica segura), 
+    #el diseño permite la posibilidad de mejorar la seguridad almacenando las credenciales 
+    # en un lugar más seguro (como variables de entorno).
     public function __construct()
     {
-        // Valores por defecto al crear el objeto
-        $this->host = "localhost";
-        $this->usuario = "root";
-        $this->password = "";
-        $this->db = "daw";
+        // Cargar las variables de entorno desde el archivo .env
+        $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . "/../");
+        $dotenv->load();
+
+        // Asignar las variables de entorno a las propiedades de la clase
+        $this->host = $_ENV['DB_HOST'];
+        $this->usuario = $_ENV['DB_USER'];
+        $this->password = $_ENV['DB_PASS'];
+        $this->db = $_ENV['DB_NAME'];
+
+        if (!$this->host || !$this->usuario || !$this->db) {
+            throw new Exception('No se pudieron cargar las variables de entorno correctamente.');
+        }
     }
 
     // Metodo que conecta con la base de datos
     public function conectar()
     {
-        // Conectandose con la base de datos
         $this->conexion = new mysqli($this->host, $this->usuario, $this->password, $this->db);
-        // Evaluando exito de la conexion
         if ($this->conexion->connect_errno) {
             return false;
         } else {
@@ -44,13 +51,11 @@ class DataSource
         }
     }
 
-    // Metodo que permite preparar sentencias
     public function preparar($sql)
     {
         return $this->conexion->prepare($sql);
     }
 
-    // Metodo que cierra la conexion
     public function desconectar()
     {
         $this->conexion->close();
